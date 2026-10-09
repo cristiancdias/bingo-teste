@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bingo Show!</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Tela Inicial -->
+    <main id="tela-inicial">
+      <h1>Bingo</h1>
+      <button class="btn" type="button" onclick="mostrarCartelas()">Gerar Cartelas</button>
+      <button class="btn" type="button" onclick="mostrarJogo()">Iniciar Jogo</button>
+    </main>
+
+    <!-- Tela de Cartelas -->
+    <section id="tela-cartelas" class="hidden">
+      <h2>Gerar Cartelas</h2>
+
+      <label for="imagemCentral">
+        Imagem Central:
+        <input type="file" id="imagemCentral" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
+      </label>
+
+      <p id="statusImagem" class="status"></p>
+
+      <label for="qtdCartelas">
+        Quantidade de Cartelas:
+        <input
+          type="number"
+          id="qtdCartelas"
+          min="1"
+          max="100"
+          value="4"
+          step="1"
+          inputmode="numeric"
+        />
+      </label>
+
+      <div>
+        <button class="btn" id="btnGerarCartelas" type="button" onclick="gerarCartelas()">
+          Pré-visualizar
+        </button>
+      </div>
+
+      <div id="preview"></div>
+
+      <button class="btn hidden" id="btnPDF" type="button" onclick="gerarPDF()">
+        Gerar PDF
+      </button>
+
+      <p id="statusPDF" class="status"></p>
+
+      <div>
+        <button class="btn" type="button" onclick="voltar()">Voltar</button>
+      </div>
+    </section>
+
+    <!-- Tela do Jogo -->
+    <section id="tela-jogo" class="hidden">
+      <h2>Jogo de Bingo</h2>
+
+      <button class="btn" id="btnProximaPedra" type="button" onclick="sortearPedra()">
+        🎱 Próxima Pedra
+      </button>
+      <button class="btn" id="btnModoProjecao" type="button" onclick="alternarModoProjecao()">📺 Modo Data Show</button>
+
+      <div class="sorteio-palco">
+        <div class="globo-area" aria-live="polite">
+          <div class="globo" id="globo" aria-label="Globo de bingo animado">
+            <div class="globo-grade"></div><div class="globo-reflexo"></div>
+            <div class="globo-bolas" id="globoBolas"></div>
+            <span class="globo-eixo eixo-esquerdo"></span><span class="globo-eixo eixo-direito"></span>
+          </div>
+          <div class="base-globo"></div>
+          <p id="statusGlobo">Pronto para sortear</p>
+        </div>
+        <div class="resultado-pedra"><p class="rotulo-pedra">PEDRA SORTEADA</p><h3 id="pedraAtual" aria-live="polite">--</h3><p id="mensagemSorteio">Clique em “Próxima Pedra” para começar.</p></div>
+      </div>
+
+      <div id="tabela-jogo-container"></div>
+
+      <div class="ganhadores">
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar horizontal">
+          <img src="img/horizontal.jpg" class="imagem" alt="Horizontal" />
+        </a>
+
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar vertical">
+          <img src="img/vertical.jpg" class="imagem" alt="Vertical" />
+        </a>
+
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar diagonal">
+          <img src="img/diagonal.jpg" class="imagem" alt="Diagonal" />
+        </a>
+
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar quatro cantos">
+          <img src="img/quatro cantos.jpg" class="imagem" alt="Quatro cantos" />
+        </a>
+
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar prisão do índio">
+          <img src="img/prisao-do-indio.png" class="imagem" alt="Prisão do índio" />
+        </a>
+
+        <a href="#" class="click-hide" aria-label="Mostrar/ocultar cartela cheia">
+          <img src="img/cheia.jpg" class="imagem" alt="Cartela cheia" />
+        </a>
+
+        <br />
+
+        <button class="btn" id="restaurar" type="button">
+          Restaurar Ganhadores
+        </button>
+      </div>
+
+      <div>
+        <button class="btn" type="button" onclick="voltar()">Voltar</button>
+      </div>
+    </section>
+
+    <script src="script.js"></script>
+
+    <!-- Bibliotecas usadas somente na geração do PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </body>
+</html>
