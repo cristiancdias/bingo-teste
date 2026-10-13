@@ -184,9 +184,8 @@ input[type="file"] {
   flex-wrap: wrap;
   margin: 20px auto 30px;
   padding: 18px;
-  background: linear-gradient(135deg, #f4f8fc, #e5edf5);
   border-radius: 22px;
-  max-width: 1000px;
+  max-width: 1500px;
 }
 .globo-area {
   display: flex;

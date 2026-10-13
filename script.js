@@ -54,12 +54,7 @@ function lerArquivoComoDataURL(file) {
 /**
  * Converte SVG em PNG para melhorar a compatibilidade com html2canvas/PDF.
  */
-function svgFileToPngDataUrl(
-  svgFile,
-  width = 120,
-  height = 120,
-  scale = 2
-) {
+function svgFileToPngDataUrl(svgFile, width = 120, height = 120, scale = 2) {
   return new Promise(async (resolve, reject) => {
     try {
       const svgText = await svgFile.text()
@@ -112,7 +107,10 @@ imagemInput.addEventListener("change", async event => {
 
   if (!file) return
 
-  if (!file.type.startsWith("image/") && !file.name.toLowerCase().endsWith(".svg")) {
+  if (
+    !file.type.startsWith("image/") &&
+    !file.name.toLowerCase().endsWith(".svg")
+  ) {
     statusImagem.textContent = "Selecione um arquivo de imagem válido."
     imagemInput.value = ""
     return
@@ -356,12 +354,35 @@ function iniciarJogo() {
 
   document.getElementById("pedraAtual").innerText = "--"
   sorteioEmAndamento = false
+
   const globo = document.getElementById("globo")
-  if (globo) globo.classList.remove("animando")
+  const globoArea = document.querySelector(".globo-area")
+  const layout = document.querySelector(".sorteio-layout")
+
+  if (globo) {
+    globo.classList.remove("animando")
+  }
+
+  if (globoArea) {
+    globoArea.classList.remove("oculto")
+  }
+
+  if (layout) {
+    layout.classList.remove("resultado-final")
+  }
+
   const statusGlobo = document.getElementById("statusGlobo")
-  if (statusGlobo) statusGlobo.textContent = "Pronto para sortear"
+
+  if (statusGlobo) {
+    statusGlobo.textContent = "Pronto para sortear"
+  }
+
   const mensagemSorteio = document.getElementById("mensagemSorteio")
-  if (mensagemSorteio) mensagemSorteio.textContent = "Sorteio reiniciado."
+
+  if (mensagemSorteio) {
+    mensagemSorteio.textContent = "Sorteio reiniciado."
+  }
+
   btnProximaPedra.textContent = "🎱 Próxima Pedra"
   btnProximaPedra.disabled = false
 
@@ -445,9 +466,15 @@ function criarBolasGlobo() {
     const bola = document.createElement("span")
     bola.className = "bola-globo"
     bola.textContent = numero
-    const angulo = Math.PI * 2 * i / numeros.length
-    bola.style.setProperty("--x", `${50 + Math.cos(angulo) * (35 + i % 3 * 3)}%`)
-    bola.style.setProperty("--y", `${50 + Math.sin(angulo) * (34 + i % 4 * 3)}%`)
+    const angulo = (Math.PI * 2 * i) / numeros.length
+    bola.style.setProperty(
+      "--x",
+      `${50 + Math.cos(angulo) * (35 + (i % 3) * 3)}%`
+    )
+    bola.style.setProperty(
+      "--y",
+      `${50 + Math.sin(angulo) * (34 + (i % 4) * 3)}%`
+    )
     recipiente.appendChild(bola)
   })
 }
@@ -459,7 +486,13 @@ function tocarEfeito(tipo) {
     if (!contextoAudio) contextoAudio = new AudioCtx()
     if (contextoAudio.state === "suspended") contextoAudio.resume()
     const agora = contextoAudio.currentTime
-    const nota = (frequencia, atraso, duracao, volume = 0.035, forma = "triangle") => {
+    const nota = (
+      frequencia,
+      atraso,
+      duracao,
+      volume = 0.035,
+      forma = "triangle"
+    ) => {
       const oscilador = contextoAudio.createOscillator()
       const ganho = contextoAudio.createGain()
       oscilador.type = forma
@@ -467,8 +500,10 @@ function tocarEfeito(tipo) {
       ganho.gain.setValueAtTime(0.0001, agora + atraso)
       ganho.gain.exponentialRampToValueAtTime(volume, agora + atraso + 0.02)
       ganho.gain.exponentialRampToValueAtTime(0.0001, agora + atraso + duracao)
-      oscilador.connect(ganho); ganho.connect(contextoAudio.destination)
-      oscilador.start(agora + atraso); oscilador.stop(agora + atraso + duracao + 0.03)
+      oscilador.connect(ganho)
+      ganho.connect(contextoAudio.destination)
+      oscilador.start(agora + atraso)
+      oscilador.stop(agora + atraso + duracao + 0.03)
     }
     if (tipo === "giro") {
       for (let i = 0; i < 9; i++) nota(180 + i * 32, i * 0.16, 0.17, 0.025)
@@ -477,42 +512,105 @@ function tocarEfeito(tipo) {
       nota(660, 0, 0.13, 0.05, "sine")
       nota(880, 0.13, 0.23, 0.05, "sine")
     }
-  } catch (erro) { /* áudio é opcional; o sorteio segue normalmente */ }
+  } catch (erro) {
+    /* áudio é opcional; o sorteio segue normalmente */
+  }
 }
 
 function sortearPedra() {
   if (sorteioEmAndamento) return
+
   if (pedras.length === 0) {
     btnProximaPedra.disabled = true
     alert("Todas as pedras já foram sorteadas!")
     return
   }
+
   sorteioEmAndamento = true
   btnProximaPedra.disabled = true
   btnProximaPedra.textContent = "🎱 Sorteando..."
+
   const globo = document.getElementById("globo")
+  const globoArea = document.querySelector(".globo-area")
+  const layout = document.querySelector(".sorteio-layout")
   const status = document.getElementById("statusGlobo")
   const mensagem = document.getElementById("mensagemSorteio")
-  if (globo) { globo.classList.remove("animando"); void globo.offsetWidth; globo.classList.add("animando") }
-  if (status) status.textContent = "Misturando as pedras..."
-  if (mensagem) mensagem.textContent = "Atenção... a próxima pedra está chegando!"
+
+  // Mostra novamente o globo ao iniciar o próximo sorteio.
+  if (globoArea) {
+    globoArea.classList.remove("oculto")
+  }
+
+  if (layout) {
+    layout.classList.remove("resultado-final")
+  }
+
+  // Inicia a animação do globo.
+  if (globo) {
+    globo.classList.remove("animando")
+    void globo.offsetWidth
+    globo.classList.add("animando")
+  }
+
+  if (status) {
+    status.textContent = "Misturando as pedras..."
+  }
+
+  if (mensagem) {
+    mensagem.textContent = "Atenção... a próxima pedra está chegando!"
+  }
+
   tocarEfeito("giro")
 
+  // Escolhe uma pedra aleatória sem repetir números.
   const idx = Math.floor(Math.random() * pedras.length)
   const numero = pedras.splice(idx, 1)[0]
+
+  // Aguarda 2 segundos para revelar a pedra.
   window.setTimeout(() => {
     sorteadas.push(numero)
+
     const pedraAtual = document.getElementById("pedraAtual")
-    pedraAtual.innerText = `${getLetra(numero)} - ${numero}`
-    pedraAtual.classList.remove("pedra-revelada")
-    void pedraAtual.offsetWidth
-    pedraAtual.classList.add("pedra-revelada")
+
+    if (pedraAtual) {
+      pedraAtual.innerText = `${getLetra(numero)} - ${numero}`
+      pedraAtual.classList.remove("pedra-revelada")
+
+      void pedraAtual.offsetWidth
+
+      pedraAtual.classList.add("pedra-revelada")
+    }
+
+    // Atualiza a tabela com os números sorteados.
     renderizarPedrasSorteadas()
-    if (status) status.textContent = "Pronto para a próxima pedra"
-    if (mensagem) mensagem.textContent = `Saiu ${getLetra(numero)}-${numero}!`
-    if (globo) globo.classList.remove("animando")
+
+    // Para a animação.
+    if (globo) {
+      globo.classList.remove("animando")
+    }
+
+    // Esconde o globo e destaca a pedra sorteada.
+    if (globoArea) {
+      globoArea.classList.add("oculto")
+    }
+
+    if (layout) {
+      layout.classList.add("resultado-final")
+    }
+
+    if (status) {
+      status.textContent = "Pronto para a próxima pedra"
+    }
+
+    if (mensagem) {
+      mensagem.textContent = `Saiu ${getLetra(numero)}-${numero}!`
+    }
+
     tocarEfeito("revelar")
+
     sorteioEmAndamento = false
+
+    // Verifica se todas as pedras foram sorteadas.
     if (pedras.length === 0) {
       btnProximaPedra.disabled = true
       btnProximaPedra.textContent = "Sorteio concluído"
@@ -526,7 +624,10 @@ function sortearPedra() {
 function alternarModoProjecao() {
   document.body.classList.toggle("modo-projecao")
   const botao = document.getElementById("btnModoProjecao")
-  if (botao) botao.textContent = document.body.classList.contains("modo-projecao") ? "🖥️ Modo Normal" : "📺 Modo Data Show"
+  if (botao)
+    botao.textContent = document.body.classList.contains("modo-projecao")
+      ? "🖥️ Modo Normal"
+      : "📺 Modo Data Show"
 }
 
 function getLetra(num) {
@@ -556,6 +657,5 @@ btnRestaurar.addEventListener("click", () => {
 
   imagens.forEach(img => img.classList.remove("hidden"))
 })
-
 
 document.addEventListener("DOMContentLoaded", criarBolasGlobo)

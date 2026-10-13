@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -10,8 +10,12 @@
     <!-- Tela Inicial -->
     <main id="tela-inicial">
       <h1>Bingo</h1>
-      <button class="btn" type="button" onclick="mostrarCartelas()">Gerar Cartelas</button>
-      <button class="btn" type="button" onclick="mostrarJogo()">Iniciar Jogo</button>
+      <button class="btn" type="button" onclick="mostrarCartelas()">
+        Gerar Cartelas
+      </button>
+      <button class="btn" type="button" onclick="mostrarJogo()">
+        Iniciar Jogo
+      </button>
     </main>
 
     <!-- Tela de Cartelas -->
@@ -20,7 +24,11 @@
 
       <label for="imagemCentral">
         Imagem Central:
-        <input type="file" id="imagemCentral" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
+        <input
+          type="file"
+          id="imagemCentral"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+        />
       </label>
 
       <p id="statusImagem" class="status"></p>
@@ -39,7 +47,12 @@
       </label>
 
       <div>
-        <button class="btn" id="btnGerarCartelas" type="button" onclick="gerarCartelas()">
+        <button
+          class="btn"
+          id="btnGerarCartelas"
+          type="button"
+          onclick="gerarCartelas()"
+        >
           Pré-visualizar
         </button>
       </div>
@@ -61,22 +74,31 @@
     <section id="tela-jogo" class="hidden">
       <h2>Jogo de Bingo</h2>
 
-      <button class="btn" id="btnProximaPedra" type="button" onclick="sortearPedra()">
-        🎱 Próxima Pedra
-      </button>
-      <button class="btn" id="btnModoProjecao" type="button" onclick="alternarModoProjecao()">📺 Modo Data Show</button>
-
       <div class="sorteio-palco">
+        <button
+          class="btn"
+          id="btnProximaPedra"
+          type="button"
+          onclick="sortearPedra()"
+        >
+          🎱 Próxima Pedra
+        </button>
         <div class="globo-area" aria-live="polite">
           <div class="globo" id="globo" aria-label="Globo de bingo animado">
-            <div class="globo-grade"></div><div class="globo-reflexo"></div>
+            <div class="globo-grade"></div>
+            <div class="globo-reflexo"></div>
             <div class="globo-bolas" id="globoBolas"></div>
-            <span class="globo-eixo eixo-esquerdo"></span><span class="globo-eixo eixo-direito"></span>
+            <span class="globo-eixo eixo-esquerdo"></span
+            ><span class="globo-eixo eixo-direito"></span>
           </div>
           <div class="base-globo"></div>
           <p id="statusGlobo">Pronto para sortear</p>
         </div>
-        <div class="resultado-pedra"><p class="rotulo-pedra">PEDRA SORTEADA</p><h3 id="pedraAtual" aria-live="polite">--</h3><p id="mensagemSorteio">Clique em “Próxima Pedra” para começar.</p></div>
+        <div class="resultado-pedra">
+          <p class="rotulo-pedra">PEDRA SORTEADA</p>
+          <h3 id="pedraAtual" aria-live="polite">--</h3>
+          <p id="mensagemSorteio">Clique em “Próxima Pedra” para começar.</p>
+        </div>
       </div>
 
       <div id="tabela-jogo-container"></div>
@@ -94,15 +116,31 @@
           <img src="img/diagonal.jpg" class="imagem" alt="Diagonal" />
         </a>
 
-        <a href="#" class="click-hide" aria-label="Mostrar/ocultar quatro cantos">
+        <a
+          href="#"
+          class="click-hide"
+          aria-label="Mostrar/ocultar quatro cantos"
+        >
           <img src="img/quatro cantos.jpg" class="imagem" alt="Quatro cantos" />
         </a>
 
-        <a href="#" class="click-hide" aria-label="Mostrar/ocultar prisão do índio">
-          <img src="img/prisao-do-indio.png" class="imagem" alt="Prisão do índio" />
+        <a
+          href="#"
+          class="click-hide"
+          aria-label="Mostrar/ocultar prisão do índio"
+        >
+          <img
+            src="img/prisao-do-indio.png"
+            class="imagem"
+            alt="Prisão do índio"
+          />
         </a>
 
-        <a href="#" class="click-hide" aria-label="Mostrar/ocultar cartela cheia">
+        <a
+          href="#"
+          class="click-hide"
+          aria-label="Mostrar/ocultar cartela cheia"
+        >
           <img src="img/cheia.jpg" class="imagem" alt="Cartela cheia" />
         </a>
 
