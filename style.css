@@ -388,9 +388,14 @@ input[type="file"] {
   animation: revelarPedra 0.45s cubic-bezier(0.2, 1.5, 0.5, 1) both;
 }
 @keyframes girarGlobo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes chacoalharBolas {
-  /*
   0% {
     transform: translate(0, 0) rotate(0);
   }
@@ -405,12 +410,6 @@ input[type="file"] {
   }
   100% {
     transform: translate(0, 0) rotate(0);
-  }*/
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 @keyframes revelarPedra {
