@@ -621,15 +621,6 @@ function sortearPedra() {
   }, 2000)
 }
 
-function alternarModoProjecao() {
-  document.body.classList.toggle("modo-projecao")
-  const botao = document.getElementById("btnModoProjecao")
-  if (botao)
-    botao.textContent = document.body.classList.contains("modo-projecao")
-      ? "🖥️ Modo Normal"
-      : "📺 Modo Data Show"
-}
-
 function getLetra(num) {
   if (num <= 15) return "B"
   if (num <= 30) return "I"
