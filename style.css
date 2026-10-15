@@ -434,24 +434,7 @@ input[type="file"] {
     transform: scale(1) rotate(0);
   }
 }
-body.modo-projecao {
-  background: #fff;
-  color: #111;
-}
-body.modo-projecao #pedraAtual {
-  font-size: clamp(48px, 7vw, 76px);
-}
-body.modo-projecao .sorteio-palco {
-  border: 2px solid #222;
-  background: #fff;
-}
-body.modo-projecao .resultado-pedra {
-  box-shadow: none;
-  border: 1px solid #222;
-}
-body.modo-projecao #tabela-jogo-container td {
-  font-weight: 900;
-}
+
 @media (max-width: 600px) {
   .sorteio-palco {
     gap: 24px;
