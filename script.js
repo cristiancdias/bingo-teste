@@ -17,9 +17,14 @@ const MAX_IMAGEM_BYTES = 2 * 1024 * 1024
 
 let imagemCentralBase64 = null
 let imagemCarregando = false
+let versaoImagem = 0
+let gerandoPDF = false
 
 let pedras = []
 let sorteadas = []
+let sorteioEmAndamento = false
+let timeoutSorteio = null
+let contextoAudio = null
 
 function mostrarCartelas() {
   telaInicial.classList.add("hidden")
@@ -35,9 +40,26 @@ function mostrarJogo() {
 }
 
 function voltar() {
+  // Impede que um sorteio pendente altere o estado de um jogo futuro.
+  cancelarSorteioPendente()
+
+  // O PDF é gerado a partir das cartelas visíveis; não permite sair no meio.
+  if (gerandoPDF) {
+    alert("Aguarde o PDF terminar de ser gerado.")
+    return
+  }
+
   telaCartelas.classList.add("hidden")
   telaJogo.classList.add("hidden")
   telaInicial.classList.remove("hidden")
+}
+
+function cancelarSorteioPendente() {
+  if (timeoutSorteio !== null) {
+    window.clearTimeout(timeoutSorteio)
+    timeoutSorteio = null
+  }
+  sorteioEmAndamento = false
 }
 
 function lerArquivoComoDataURL(file) {
@@ -76,7 +98,23 @@ function svgFileToPngDataUrl(svgFile, width = 120, height = 120, scale = 2) {
 
           ctx.fillStyle = "#ffffff"
           ctx.fillRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+          // Preserva a proporção original do SVG (contain, centralizado).
+          const larguraOriginal = img.naturalWidth || canvas.width
+          const alturaOriginal = img.naturalHeight || canvas.height
+          const proporcao = Math.min(
+            canvas.width / larguraOriginal,
+            canvas.height / alturaOriginal
+          )
+          const w = larguraOriginal * proporcao
+          const h = alturaOriginal * proporcao
+          ctx.drawImage(
+            img,
+            (canvas.width - w) / 2,
+            (canvas.height - h) / 2,
+            w,
+            h
+          )
 
           URL.revokeObjectURL(url)
           resolve(canvas.toDataURL("image/png"))
@@ -100,6 +138,9 @@ function svgFileToPngDataUrl(svgFile, width = 120, height = 120, scale = 2) {
 
 imagemInput.addEventListener("change", async event => {
   const file = event.target.files[0]
+
+  // Cada seleção recebe uma versão; resultados de seleções antigas são ignorados.
+  const minhaVersao = ++versaoImagem
 
   imagemCentralBase64 = null
   imagemCarregando = false
@@ -126,22 +167,31 @@ imagemInput.addEventListener("change", async event => {
   statusImagem.textContent = "Carregando imagem..."
 
   try {
+    let resultado
+
     if (
       file.type === "image/svg+xml" ||
       file.name.toLowerCase().endsWith(".svg")
     ) {
-      imagemCentralBase64 = await svgFileToPngDataUrl(file, 120, 120, 2)
+      resultado = await svgFileToPngDataUrl(file, 120, 120, 2)
     } else {
-      imagemCentralBase64 = await lerArquivoComoDataURL(file)
+      resultado = await lerArquivoComoDataURL(file)
     }
 
+    if (minhaVersao !== versaoImagem) return
+
+    imagemCentralBase64 = resultado
     statusImagem.textContent = "Imagem carregada com sucesso."
   } catch (error) {
+    if (minhaVersao !== versaoImagem) return
+
     console.error(error)
     imagemCentralBase64 = null
     statusImagem.textContent = "Não foi possível carregar a imagem."
   } finally {
-    imagemCarregando = false
+    if (minhaVersao === versaoImagem) {
+      imagemCarregando = false
+    }
   }
 })
 
@@ -172,6 +222,7 @@ function gerarCartelas() {
   statusPDF.textContent = ""
 
   const cartelasGeradas = new Set()
+  const fragmento = document.createDocumentFragment()
 
   for (let i = 0; i < qtd; i++) {
     let cartela
@@ -185,14 +236,18 @@ function gerarCartelas() {
 
       // Proteção contra uma eventual falha na geração aleatória.
       if (tentativas > 1000) {
-        throw new Error("Não foi possível gerar cartelas únicas.")
+        console.error("Não foi possível gerar cartelas únicas.")
+        statusPDF.textContent = "Não foi possível gerar cartelas únicas."
+        alert("Não foi possível gerar cartelas únicas. Tente novamente.")
+        return
       }
     } while (cartelasGeradas.has(assinatura))
 
     cartelasGeradas.add(assinatura)
-    preview.appendChild(cartela)
+    fragmento.appendChild(cartela)
   }
 
+  preview.appendChild(fragmento)
   btnPDF.classList.remove("hidden")
 }
 
@@ -289,6 +344,7 @@ async function gerarPDF() {
     return
   }
 
+  gerandoPDF = true
   btnPDF.disabled = true
   btnGerarCartelas.disabled = true
   statusPDF.textContent = "Gerando PDF..."
@@ -317,14 +373,18 @@ async function gerarPDF() {
 
       const imgData = canvas.toDataURL("image/jpeg", 0.9)
 
-      doc.addImage(imgData, "JPEG", x, y, 88, 88)
+      // Mantém a proporção real da cartela (antes era forçada a 88x88 mm).
+      const larguraPDF = 88
+      const alturaPDF = (larguraPDF * canvas.height) / canvas.width
+
+      doc.addImage(imgData, "JPEG", x, y, larguraPDF, alturaPDF)
 
       x += 100
       count++
 
       if (count % 2 === 0) {
         x = 10
-        y += 100
+        y += alturaPDF + 8
       }
 
       if (count % 4 === 0 && i < cartelas.length - 1) {
@@ -341,6 +401,7 @@ async function gerarPDF() {
     statusPDF.textContent = "Erro ao gerar o PDF."
     alert("Não foi possível gerar o PDF. Veja o console para mais detalhes.")
   } finally {
+    gerandoPDF = false
     btnPDF.disabled = false
     btnGerarCartelas.disabled = false
   }
@@ -349,15 +410,16 @@ async function gerarPDF() {
 // ------------------- Jogo -------------------
 
 function iniciarJogo() {
+  // Garante que nenhum sorteio de uma partida anterior altere este jogo.
+  cancelarSorteioPendente()
+
   pedras = Array.from({ length: 75 }, (_, index) => index + 1)
   sorteadas = []
 
   document.getElementById("pedraAtual").innerText = "--"
-  sorteioEmAndamento = false
 
   const globo = document.getElementById("globo")
   const globoArea = document.querySelector(".globo-area")
-  const layout = document.querySelector(".sorteio-layout")
 
   if (globo) {
     globo.classList.remove("animando")
@@ -365,10 +427,6 @@ function iniciarJogo() {
 
   if (globoArea) {
     globoArea.classList.remove("oculto")
-  }
-
-  if (layout) {
-    layout.classList.remove("resultado-final")
   }
 
   const statusGlobo = document.getElementById("statusGlobo")
@@ -380,7 +438,7 @@ function iniciarJogo() {
   const mensagemSorteio = document.getElementById("mensagemSorteio")
 
   if (mensagemSorteio) {
-    mensagemSorteio.textContent = "Sorteio reiniciado."
+    mensagemSorteio.textContent = "Clique em “Próxima Pedra” para começar."
   }
 
   btnProximaPedra.textContent = "🎱 Próxima Pedra"
@@ -454,9 +512,6 @@ function renderizarPedrasSorteadas() {
     }
   }
 }
-
-let sorteioEmAndamento = false
-let contextoAudio = null
 
 function criarBolasGlobo() {
   const recipiente = document.getElementById("globoBolas")
@@ -532,17 +587,12 @@ function sortearPedra() {
 
   const globo = document.getElementById("globo")
   const globoArea = document.querySelector(".globo-area")
-  const layout = document.querySelector(".sorteio-layout")
   const status = document.getElementById("statusGlobo")
   const mensagem = document.getElementById("mensagemSorteio")
 
   // Mostra novamente o globo ao iniciar o próximo sorteio.
   if (globoArea) {
     globoArea.classList.remove("oculto")
-  }
-
-  if (layout) {
-    layout.classList.remove("resultado-final")
   }
 
   // Inicia a animação do globo.
@@ -567,7 +617,8 @@ function sortearPedra() {
   const numero = pedras.splice(idx, 1)[0]
 
   // Aguarda 2 segundos para revelar a pedra.
-  window.setTimeout(() => {
+  timeoutSorteio = window.setTimeout(() => {
+    timeoutSorteio = null
     sorteadas.push(numero)
 
     const pedraAtual = document.getElementById("pedraAtual")
@@ -592,10 +643,6 @@ function sortearPedra() {
     // Esconde o globo e destaca a pedra sorteada.
     if (globoArea) {
       globoArea.classList.add("oculto")
-    }
-
-    if (layout) {
-      layout.classList.add("resultado-final")
     }
 
     if (status) {
@@ -630,23 +677,15 @@ function getLetra(num) {
 }
 
 // Esconder imagens dos padrões de vitória.
-links.forEach(link => {
-  link.addEventListener("click", event => {
-    event.preventDefault()
-
-    const img = link.querySelector("img")
-
-    if (img) {
-      img.classList.add("hidden")
-    }
+links.forEach(botao => {
+  botao.addEventListener("click", () => {
+    botao.classList.add("hidden")
   })
 })
 
 // Restaurar imagens.
 btnRestaurar.addEventListener("click", () => {
-  const imagens = document.querySelectorAll(".click-hide img")
-
-  imagens.forEach(img => img.classList.remove("hidden"))
+  links.forEach(botao => botao.classList.remove("hidden"))
 })
 
 document.addEventListener("DOMContentLoaded", criarBolasGlobo)

@@ -137,14 +137,23 @@ input[type="file"] {
   margin-top: 15px;
 }
 
+.click-hide {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.click-hide:focus-visible {
+  outline: 3px solid #3498db;
+  outline-offset: 2px;
+}
+
 .imagem {
+  display: block;
   width: 300px;
   max-width: calc(100vw - 40px);
   margin: 10px;
-  cursor: pointer;
-  transition:
-    opacity 0.5s ease,
-    visibility 0.5s ease;
 }
 
 #preview {
@@ -158,10 +167,6 @@ input[type="file"] {
 
   .btn {
     width: min(90%, 320px);
-  }
-
-  #pedraAtual {
-    font-size: 44px;
   }
 
   #tabela-jogo-container td {
@@ -361,7 +366,8 @@ input[type="file"] {
   margin: 12px auto;
   border: 5px solid white;
   border-radius: 50%;
-  font-size: clamp(38px, 5vw, 58px);
+  font-size: clamp(24px, 3.2vw, 34px);
+  white-space: nowrap;
   color: #172033;
   background: radial-gradient(
     circle at 30% 25%,
@@ -438,34 +444,5 @@ input[type="file"] {
 
 /* Oculta o globo e sua estrutura */
 .globo-area.oculto {
-  display: none;
-}
-
-/* Centraliza o resultado quando o globo desaparecer */
-.sorteio-layout.resultado-final {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.resultado-final .resultado-area {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.resultado-final .pedra-atual-card {
-  padding: 35px 20px;
-}
-
-.resultado-final .pedra-atual {
-  width: 180px;
-  font-size: 4.5rem;
-  margin: 20px auto;
-}
-
-/* Oculta informações extras na apresentação final */
-.resultado-final ~ .tabela-area,
-.resultado-final ~ .padroes-area {
   display: none;
 }
